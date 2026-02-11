@@ -137,19 +137,57 @@ export class World {
     }
   }
 
+  private metrics = new Metrics();
+
   update(deltaTime: number): void {
     for (const system of this.systems) {
       if (system.update) {
+        const start = performance.now();
+
         system.update(deltaTime);
+
+        const end = performance.now();
+        const duration = end - start;
+
+        this.metrics.record(system.constructor.name, duration);
       }
     }
   }
 
   destroy(): void {
+    console.table(this.metrics.getAverageStats());
+
     for (const system of this.systems) {
       if (system.destroy) {
         system.destroy();
       }
     }
+  }
+}
+
+class Metrics {
+  private records: Map<string, number[]> = new Map();
+
+  record(name: string, duration: number) {
+    const durations = this.records.get(name);
+
+    if (durations) {
+      durations.push(duration);
+    } else {
+      this.records.set(name, [duration]);
+    }
+  }
+
+  getAverageStats() {
+    const stats: { name: string; duration: number }[] = [];
+
+    for (const [name, durations] of this.records) {
+      const total = durations.reduce((sum, duration) => sum + duration, 0);
+      const average = total / durations.length;
+
+      stats.push({ name, duration: average });
+    }
+
+    return stats;
   }
 }

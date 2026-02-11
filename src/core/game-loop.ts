@@ -44,6 +44,12 @@ export class GameLoop {
     const deltaTime = (currentTime - this.lastTime) / 1000; // Delta time in seconds
     this.lastTime = currentTime;
 
+    if (deltaTime > 0.012) {
+      console.group("Game Loop");
+      console.log("[deltaTime]", deltaTime);
+      console.groupEnd();
+    }
+
     // Update game state
     this.world.update(deltaTime);
 
