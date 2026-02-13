@@ -5,11 +5,17 @@ import type { World } from "./world";
  */
 export interface System {
   /**
-   * Called once when the game loop starts.
-   * Ideal for setup, adding event listeners, and receiving a reference to the world.
+   * Called once when the game loop starts, during the first phase of initialization.
+   * Ideal for basic setup, getting a world reference, and populating initial data into components.
    * @param world The game world.
    */
   initialize?(world: World): void;
+
+  /**
+   * Called once after all systems have completed their `initialize` phase.
+   * Ideal for setup logic that depends on data that other systems have initialized.
+   */
+  postInitialize?(): void;
 
   /**
    * Called on every frame for systems that need to perform continuous updates.

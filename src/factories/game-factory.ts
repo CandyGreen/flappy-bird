@@ -1,4 +1,5 @@
 import { GameComponent } from "~/components/game";
+import { ViewportComponent } from "~/components/viewport";
 import type { EntityId } from "~/core/entity";
 import type { World } from "~/core/world";
 
@@ -11,6 +12,7 @@ export function createGame(world: World): EntityId {
   const gameEntityId = world.createEntity();
 
   world.addComponent(gameEntityId, new GameComponent("ready"));
+  world.addComponent(gameEntityId, new ViewportComponent());
 
   return gameEntityId;
 }

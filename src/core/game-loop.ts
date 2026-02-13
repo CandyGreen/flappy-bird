@@ -15,25 +15,29 @@ export class GameLoop {
       this.isRunning = true;
       this.lastTime = performance.now();
 
-      // Initialize all systems in the world
+      // Initialize all systems in the world (first phase)
       this.world.initialize();
+      // Post-initialize all systems (second phase)
+      this.world.postInitialize();
 
       this.animationFrameId = requestAnimationFrame(this.boundGameLoop);
     }
   }
 
   stop(): void {
-    if (this.isRunning) {
-      this.isRunning = false;
-
-      if (this.animationFrameId !== null) {
-        cancelAnimationFrame(this.animationFrameId);
-        this.animationFrameId = null;
-      }
-
-      // Destroy all systems in the world
-      this.world.destroy();
+    if (!this.isRunning) {
+      return;
     }
+
+    this.isRunning = false;
+
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
+
+    // Destroy all systems in the world
+    this.world.destroy();
   }
 
   private gameLoop(currentTime: number): void {
@@ -44,11 +48,13 @@ export class GameLoop {
     const deltaTime = (currentTime - this.lastTime) / 1000; // Delta time in seconds
     this.lastTime = currentTime;
 
-    if (deltaTime > 0.012) {
-      console.group("Game Loop");
-      console.log("[deltaTime]", deltaTime);
-      console.groupEnd();
+    // Optional: Log deltaTime if it's unusually large (e.g., after a tab switch)
+    if (deltaTime > 0.1) {
+      console.warn("Large deltaTime detected:", deltaTime, "s. Skipping frame to prevent physics glitches.");
+      this.animationFrameId = requestAnimationFrame(this.boundGameLoop);
+      return;
     }
+
 
     // Update game state
     this.world.update(deltaTime);

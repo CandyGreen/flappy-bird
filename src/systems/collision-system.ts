@@ -4,6 +4,8 @@ import { PipeComponent } from "~/components/pipe";
 import { PositionComponent } from "~/components/position";
 import { SizeComponent } from "~/components/size";
 import { VelocityComponent } from "~/components/velocity";
+import { ViewportComponent } from "~/components/viewport";
+import type { EntityId } from "~/core/entity";
 import type { System } from "~/core/system";
 import type { World } from "~/core/world";
 
@@ -13,18 +15,23 @@ import type { World } from "~/core/world";
  * If a collision is detected, it adds a GameOverComponent to the bird.
  */
 export class CollisionSystem implements System {
-  private world!: World; // Will be set in initialize
-  private canvasHeight!: number;
+  private world!: World;
+  private gameEntityId: EntityId;
+  private viewport!: ViewportComponent;
+
+  constructor(gameEntityId: EntityId) {
+    this.gameEntityId = gameEntityId;
+  }
 
   initialize(world: World): void {
     this.world = world;
-    const canvas = document.querySelector("canvas");
+    const viewport = this.world.getComponent(this.gameEntityId, ViewportComponent);
 
-    if (canvas) {
-      this.canvasHeight = canvas.height;
+    if (viewport) {
+      this.viewport = viewport;
     } else {
-      console.error("Canvas element not found for CollisionSystem!");
-      this.canvasHeight = 0; // Fallback
+      console.error("ViewportComponent not found for CollisionSystem!");
+      this.viewport = new ViewportComponent(0, 0); // Fallback
     }
   }
 
@@ -52,7 +59,7 @@ export class CollisionSystem implements System {
     }
 
     // Ground/Ceiling collision
-    const groundY = this.canvasHeight - birdSize.height;
+    const groundY = this.viewport.height - birdSize.height;
 
     if (birdPosition.y > groundY) {
       birdPosition.y = groundY; // Place the bird exactly on the ground

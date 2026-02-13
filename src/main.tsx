@@ -24,13 +24,13 @@ const gameEntityId = createGame(world);
 
 // Register systems in the order they should run
 world.addSystem(new InputSystem(birdEntityId));
-world.addSystem(new PipeSpawnerSystem());
+world.addSystem(new PipeSpawnerSystem(gameEntityId));
 world.addSystem(new GravitySystem());
 world.addSystem(new MovementSystem());
 world.addSystem(new ScoringSystem(gameEntityId, birdEntityId));
-world.addSystem(new CollisionSystem());
+world.addSystem(new CollisionSystem(gameEntityId));
 world.addSystem(new GameControllerSystem(gameEntityId, gameLoop));
-world.addSystem(new RenderSystem());
+world.addSystem(new RenderSystem(gameEntityId));
 
 createRoot(document.getElementById("root")!).render(
   <App gameLoop={gameLoop} gameEntityId={gameEntityId} world={world} />,

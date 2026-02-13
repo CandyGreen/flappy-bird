@@ -34,6 +34,8 @@ The game currently includes the following core functionalities:
 
 -   **Single Responsibility Principle (SRP):** Each system is designed to perform a single, focused task (e.g., `GravitySystem` for gravity, `CollisionSystem` for collisions).
 -   **Decoupling:** Systems operate on data (components) without knowing about other systems or specific entity types, promoting flexibility.
+-   **Centralized Canvas Access:** Only the `RenderSystem` directly interacts with the HTML canvas element. Other systems requiring canvas dimensions (e.g., `PipeSpawnerSystem`, `CollisionSystem`) retrieve this information from a `ViewportComponent` managed by the ECS world, further decoupling game logic from rendering specifics.
+-   **Two-Phase System Initialization:** Systems now follow a two-phase initialization process (`initialize` then `postInitialize`). This allows systems to first set up their basic requirements and populate shared data (e.g., `RenderSystem` setting viewport dimensions), and then, in the `postInitialize` phase, consume that data, ensuring flexible and correct setup order for interdependent systems.
 -   **Component-Based Design:** Game objects are composed of data, allowing for highly flexible and dynamic entity definitions.
 -   **React Integration:** The React `App` component acts as the presentation layer, connecting to the ECS `World` to display game state and capture user input for game control (Start/Stop/Restart).
 
@@ -64,6 +66,8 @@ During the development, several architectural discussions and refactorings took 
 
 -   **Gravity Logic:** Initially part of `MovementSystem`, gravity was later extracted into a dedicated `GravitySystem` for better SRP.
 -   **Entity Sizing:** Hardcoded entity sizes in systems were replaced with a `SizeComponent` to decouple rendering/physics from specific entity dimensions.
--   **System Lifecycle:** A robust system lifecycle (`initialize`, `update`, `destroy` methods managed by `World` and `GameLoop`) was implemented to ensure proper setup and cleanup of systems, addressing issues with event listener management and system reusability.
+-   **System Lifecycle Enhancement:** The existing system lifecycle (`initialize`, `update`, `destroy` methods) was further enhanced by introducing a two-phase initialization (`initialize` and `postInitialize`). This resolves dependencies where some systems need data provided by others during their setup, ensuring a flexible and correct setup order.
+-   **Centralized Canvas Access & ViewportComponent:** To further decouple game logic from DOM specifics, direct canvas element access was centralized within the `RenderSystem`. Other systems now retrieve viewport dimensions from a `ViewportComponent` attached to the game entity. This refactoring was also intertwined with the two-phase initialization to ensure the `ViewportComponent` is populated before other systems attempt to read its values.
+-   **Performance Monitoring Renaming:** The `Metrics` class, used for profiling system update durations, was renamed to `Profiler` to align with common industry terminology for such tools.
 -   **Object Pooling (Attempt & Revert):** An attempt was made to implement object pooling for pipes to optimize performance by reducing garbage collection. However, initial results showed a potential increase in lag, leading to a reversion to simpler entity creation/destruction for the current scope, prioritizing functionality and stability.
 -   **Game Over Decoupling:** The "Game Over" logic was refactored. `CollisionSystem` now only marks an entity with `GameOverComponent` on collision, while a new `GameControllerSystem` is responsible for reacting to this marker, setting the global game state, and stopping the game loop, thus maintaining SRP.

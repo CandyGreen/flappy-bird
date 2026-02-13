@@ -3,13 +3,15 @@ import { PositionComponent } from "~/components/position";
 import { SizeComponent } from "~/components/size";
 import { SpriteComponent } from "~/components/sprite";
 import { VelocityComponent } from "~/components/velocity";
+import { ViewportComponent } from "~/components/viewport";
+import type { EntityId } from "~/core/entity";
 import type { System } from "~/core/system";
 import type { World } from "~/core/world";
 
 export class PipeSpawnerSystem implements System {
   private world!: World;
-  private canvasWidth!: number;
-  private canvasHeight!: number;
+  private gameEntityId: EntityId;
+  private viewport!: ViewportComponent;
 
   private pipeWidth = 80;
   private pipeGapHeight = 200; // Vertical gap
@@ -18,23 +20,32 @@ export class PipeSpawnerSystem implements System {
   private timeSinceLastSpawn = 0;
 
   private minPipeHeight = 50; // Minimum height for top or bottom pipe
-  private maxPipeHeight!: number; // Calculated in initialize
+  private maxPipeHeight!: number; // Calculated in postInitialize
 
   private pipeColor = "green";
 
+  constructor(gameEntityId: EntityId) {
+    this.gameEntityId = gameEntityId;
+  }
+
   initialize(world: World): void {
     this.world = world;
-    const canvas = document.querySelector("canvas");
+    const viewport = this.world.getComponent(this.gameEntityId, ViewportComponent);
 
-    if (canvas) {
-      this.canvasWidth = canvas.width;
-      this.canvasHeight = canvas.height;
-      this.maxPipeHeight = this.canvasHeight - this.pipeGapHeight - this.minPipeHeight;
+    if (viewport) {
+      this.viewport = viewport;
     } else {
-      console.error("Canvas element not found for PipeSpawnerSystem!");
-      this.canvasWidth = 0;
-      this.canvasHeight = 0;
-      this.maxPipeHeight = 0;
+      console.error("ViewportComponent not found for PipeSpawnerSystem!");
+      this.viewport = new ViewportComponent(0, 0); // Fallback
+    }
+  }
+
+  postInitialize(): void {
+    if (this.viewport && this.viewport.height > 0) {
+      this.maxPipeHeight = this.viewport.height - this.pipeGapHeight - this.minPipeHeight;
+    } else {
+      console.error("Viewport not initialized for PipeSpawnerSystem in postInitialize!");
+      this.maxPipeHeight = 0; // Fallback
     }
   }
 
@@ -70,11 +81,11 @@ export class PipeSpawnerSystem implements System {
     // Random height for the top pipe
     const topPipeHeight =
       Math.random() * (this.maxPipeHeight - this.minPipeHeight) + this.minPipeHeight;
-    const bottomPipeHeight = this.canvasHeight - topPipeHeight - this.pipeGapHeight;
+    const bottomPipeHeight = this.viewport.height - topPipeHeight - this.pipeGapHeight;
 
     // Top Pipe
     const topPipeId = this.world.createEntity();
-    this.world.addComponent(topPipeId, new PositionComponent(this.canvasWidth, 0));
+    this.world.addComponent(topPipeId, new PositionComponent(this.viewport.width, 0));
     this.world.addComponent(topPipeId, new SizeComponent(this.pipeWidth, topPipeHeight));
     this.world.addComponent(topPipeId, new SpriteComponent(this.pipeColor));
     this.world.addComponent(topPipeId, new VelocityComponent(-this.pipeSpeed, 0));
@@ -84,7 +95,7 @@ export class PipeSpawnerSystem implements System {
     const bottomPipeId = this.world.createEntity();
     this.world.addComponent(
       bottomPipeId,
-      new PositionComponent(this.canvasWidth, topPipeHeight + this.pipeGapHeight),
+      new PositionComponent(this.viewport.width, topPipeHeight + this.pipeGapHeight),
     );
     this.world.addComponent(bottomPipeId, new SizeComponent(this.pipeWidth, bottomPipeHeight));
     this.world.addComponent(bottomPipeId, new SpriteComponent(this.pipeColor));
