@@ -28,4 +28,10 @@ export interface System {
    * Ideal for cleanup, such as removing event listeners.
    */
   destroy?(): void;
+
+  /**
+   * Called when the game is reset.
+   * Ideal for clearing system-specific state for a new game round.
+   */
+  reset?(): void;
 }

@@ -109,6 +109,10 @@ export class World {
     this.systems.push(system);
   }
 
+  clearSystems(): void {
+    this.systems = [];
+  }
+
   getSystems(): System[] {
     return this.systems;
   }
@@ -171,6 +175,22 @@ export class World {
 
     for (const system of this.systems) {
       system.destroy?.();
+    }
+  }
+
+  reset(gameEntityId: EntityId): void {
+    // Clear all entities except the game entity
+    const entitiesToRemove = Array.from(this.entities).filter((id) => id !== gameEntityId);
+    for (const entityId of entitiesToRemove) {
+      this.removeEntity(entityId);
+    }
+
+    // Reset nextEntityId, making sure it's higher than existing gameEntityId
+    this.nextEntityId = Math.max(this.nextEntityId, gameEntityId + 1);
+
+    // Reset systems if they have a reset method
+    for (const system of this.systems) {
+      system.reset?.();
     }
   }
 }

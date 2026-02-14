@@ -1,16 +1,17 @@
 import { VelocityComponent } from "~/components/velocity";
+import type { EntityId } from "~/core/entity";
 import type { System } from "~/core/system";
 import type { World } from "~/core/world";
 
 export class InputSystem implements System {
   private world!: World; // Will be set in initialize
-  private playerEntityId: number;
+  private playerEntityId: EntityId;
   private jumpStrength: number;
 
   private handleKeyDownBinding: (event: KeyboardEvent) => void;
   private handleMouseDownBinding: (event: MouseEvent) => void;
 
-  constructor(playerEntityId: number, jumpStrength = 350) {
+  constructor(playerEntityId: EntityId, jumpStrength = 350) {
     this.playerEntityId = playerEntityId;
     this.jumpStrength = jumpStrength;
 
@@ -26,6 +27,10 @@ export class InputSystem implements System {
     document.addEventListener("mousedown", this.handleMouseDownBinding);
 
     console.log("InputSystem initialized and listeners added.");
+  }
+
+  setPlayerEntityId(id: EntityId): void {
+    this.playerEntityId = id;
   }
 
   private handleKeyDown(event: KeyboardEvent): void {

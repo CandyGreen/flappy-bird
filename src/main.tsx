@@ -4,34 +4,29 @@ import { GameLoop } from "~/core/game-loop";
 import { World } from "~/core/world";
 import { createBird } from "~/factories/bird-factory";
 import { createGame } from "~/factories/game-factory";
-import { CollisionSystem } from "~/systems/collision-system";
-import { GameControllerSystem } from "~/systems/game-controller-system";
-import { GravitySystem } from "~/systems/gravity-system";
-import { InputSystem } from "~/systems/input-system";
-import { MovementSystem } from "~/systems/movement-system";
-import { PipeSpawnerSystem } from "~/systems/pipe-spawner-system";
-import { RenderSystem } from "~/systems/render-system";
-import { ScoringSystem } from "~/systems/scoring-system";
+import { GameManager } from "~/game-manager";
+import { GameInitializer } from "~/game-initializer"; // Import the GameInitializer class
+import { GameNotifier } from "~/utils/game-notifier";
 
 import { App } from "./app";
 import "./index.css";
 
 const world = new World();
 const gameLoop = new GameLoop(world);
+const gameNotifier = new GameNotifier();
 
-const birdEntityId = createBird(world);
-const gameEntityId = createGame(world);
+// Instantiate the GameInitializer
+const gameInitializer = new GameInitializer(createBird, createGame);
 
-// Register systems in the order they should run
-world.addSystem(new InputSystem(birdEntityId));
-world.addSystem(new PipeSpawnerSystem(gameEntityId));
-world.addSystem(new GravitySystem());
-world.addSystem(new MovementSystem());
-world.addSystem(new ScoringSystem(gameEntityId, birdEntityId));
-world.addSystem(new CollisionSystem(gameEntityId));
-world.addSystem(new GameControllerSystem(gameEntityId, gameLoop));
-world.addSystem(new RenderSystem(gameEntityId));
-
-createRoot(document.getElementById("root")!).render(
-  <App gameLoop={gameLoop} gameEntityId={gameEntityId} world={world} />,
+// Instantiate GameManager
+const gameManager = new GameManager(
+  world,
+  gameLoop,
+  gameNotifier,
+  gameInitializer,
 );
+
+// Initialize the game manager, which in turn initializes the game world
+gameManager.initialize();
+
+createRoot(document.getElementById("root")!).render(<App gameManager={gameManager} />);

@@ -24,6 +24,14 @@ export class ScoringSystem implements System {
     this.world = world;
   }
 
+  setGameEntityId(id: EntityId): void {
+    this.gameEntityId = id;
+  }
+
+  setBirdEntityId(id: EntityId): void {
+    this.birdEntityId = id;
+  }
+
   update(): void {
     const game = this.world.getComponent(this.gameEntityId, GameComponent);
 
@@ -57,6 +65,14 @@ export class ScoringSystem implements System {
           this.world.addComponent(pipeId, new ScoredComponent());
         }
       }
+    }
+  }
+
+  reset(): void {
+    const game = this.world.getComponent(this.gameEntityId, GameComponent);
+    if (game) {
+      game.score = 0;
+      console.log("ScoringSystem: Score reset.");
     }
   }
 }

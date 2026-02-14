@@ -40,6 +40,10 @@ export class PipeSpawnerSystem implements System {
     }
   }
 
+  setGameEntityId(id: EntityId): void {
+    this.gameEntityId = id;
+  }
+
   postInitialize(): void {
     if (this.viewport && this.viewport.height > 0) {
       this.maxPipeHeight = this.viewport.height - this.pipeGapHeight - this.minPipeHeight;
@@ -75,6 +79,16 @@ export class PipeSpawnerSystem implements System {
         }
       }
     }
+  }
+
+  reset(): void {
+    // Remove all pipe entities
+    const pipeEntities = this.world.getEntitiesWith(PipeComponent);
+    for (const entityId of pipeEntities) {
+      this.world.removeEntity(entityId);
+    }
+    this.timeSinceLastSpawn = 0;
+    console.log("PipeSpawnerSystem: Reset completed.");
   }
 
   private spawnPipePair(): void {

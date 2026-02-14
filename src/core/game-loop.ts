@@ -2,7 +2,7 @@ import { World } from "~/core/world";
 
 export class GameLoop {
   private lastTime: number = 0;
-  private isRunning: boolean = false;
+  private _isRunning: boolean = false;
   private animationFrameId: number | null = null;
   private boundGameLoop: (currentTime: number) => void;
 
@@ -10,9 +10,13 @@ export class GameLoop {
     this.boundGameLoop = this.gameLoop.bind(this);
   }
 
+  get isRunning(): boolean {
+    return this._isRunning;
+  }
+
   start(): void {
-    if (!this.isRunning) {
-      this.isRunning = true;
+    if (!this._isRunning) {
+      this._isRunning = true;
       this.lastTime = performance.now();
 
       // Initialize all systems in the world (first phase)
@@ -25,11 +29,11 @@ export class GameLoop {
   }
 
   stop(): void {
-    if (!this.isRunning) {
+    if (!this._isRunning) {
       return;
     }
 
-    this.isRunning = false;
+    this._isRunning = false;
 
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId);
@@ -41,7 +45,7 @@ export class GameLoop {
   }
 
   private gameLoop(currentTime: number): void {
-    if (!this.isRunning) {
+    if (!this._isRunning) {
       return;
     }
 
@@ -50,11 +54,14 @@ export class GameLoop {
 
     // Optional: Log deltaTime if it's unusually large (e.g., after a tab switch)
     if (deltaTime > 0.1) {
-      console.warn("Large deltaTime detected:", deltaTime, "s. Skipping frame to prevent physics glitches.");
+      console.warn(
+        "Large deltaTime detected:",
+        deltaTime,
+        "s. Skipping frame to prevent physics glitches.",
+      );
       this.animationFrameId = requestAnimationFrame(this.boundGameLoop);
       return;
     }
-
 
     // Update game state
     this.world.update(deltaTime);
