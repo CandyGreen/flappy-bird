@@ -33,11 +33,9 @@ export class GameInitializer {
     gameLoop: GameLoop,
     gameNotifier: GameNotifier,
   ): GameInitializationResult {
-    // Create initial entities
     const birdEntityId = this.createBird(world);
     const gameEntityId = this.createGame(world);
 
-    // Instantiate systems with the correct entity IDs
     const systems: System[] = [
       new InputSystem(birdEntityId),
       new PipeSpawnerSystem(gameEntityId),
@@ -49,7 +47,6 @@ export class GameInitializer {
       new RenderSystem(gameEntityId),
     ];
 
-    // Add systems to the world
     for (const system of systems) {
       world.addSystem(system);
     }

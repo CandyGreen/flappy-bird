@@ -2,7 +2,6 @@ import type { GameState } from "~/components/game";
 
 type GameEventType = "state" | "score";
 
-// Define the payload types for each event type
 interface GameEventPayloads {
   state: GameState;
   score: number;

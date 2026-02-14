@@ -1,41 +1,25 @@
 import React, { useEffect, useRef, useState } from "react";
 
 import type { GameState } from "~/components/game";
-import { GameManager } from "~/game-manager"; // Import GameManager
+import type { GameManager } from "~/utils/game-manager";
 
 interface AppProps {
-  gameManager: GameManager; // Accept GameManager as prop
+  gameManager: GameManager;
 }
 
-export const App: React.FC<AppProps> = ({ gameManager }) => { // Destructure gameManager
+export const App: React.FC<AppProps> = ({ gameManager }) => {
   const [currentGameState, setCurrentGameState] = useState<GameState>(gameManager.getState());
   const [currentScore, setCurrentScore] = useState(gameManager.getScore());
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Initialize canvas context
-  useEffect(() => {
-    if (canvasRef.current) {
-      const canvas = canvasRef.current;
-      // In a real game, you might want to adjust canvas resolution for pixel perfect rendering.
-      // For this example, we'll keep it simple.
-      const ctx = canvas.getContext("2d");
-
-      if (ctx) {
-        console.log("Canvas context obtained.");
-      }
-    }
-  }, []);
-
-  // Effect to monitor game state and score from the ECS world via GameNotifier (now via GameManager)
+  // Monitor game state and score from the ECS world
   useEffect(() => {
     const unsubscribeState = gameManager.subscribeToState((newState) => {
-      console.log("[GameManager] State changed:", newState);
       setCurrentGameState(newState);
     });
 
     const unsubscribeScore = gameManager.subscribeToScore((newScore) => {
-      console.log("[GameManager] Score changed:", newScore);
       setCurrentScore(newScore);
     });
 
@@ -46,15 +30,15 @@ export const App: React.FC<AppProps> = ({ gameManager }) => { // Destructure gam
   }, [gameManager]);
 
   const handleStartGame = () => {
-    gameManager.startGame(); // Use GameManager method
+    gameManager.startGame();
   };
 
   const handleStopGame = () => {
-    gameManager.stopGame(); // Use GameManager method
+    gameManager.stopGame();
   };
 
   const handleRestartGame = () => {
-    gameManager.restartGame(); // Use GameManager method
+    gameManager.restartGame();
   };
 
   return (
